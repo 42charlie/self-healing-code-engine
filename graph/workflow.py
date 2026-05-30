@@ -11,10 +11,12 @@ def generation_gate(state: State) -> Literal["executeCode", "updateSourceCode"]:
 	else:
 		return "updateSourceCode"
 
-def sandbox_gate(state: State) -> Literal["queryLlm", "semanticValidator"]:
+def sandbox_gate(state: State) -> Literal["queryLlm", "semanticValidator", "__end__"] :
 	'''Determines whether to query the LLM for a new solution or to perform a semantic validation'''
 	latest_change = state.changes_history[-1]
 	if latest_change.has_error:
+		if state.iteration_count > 5:
+			return END
 		return "queryLlm"
 	else:
 		return "semanticValidator"
@@ -22,7 +24,7 @@ def sandbox_gate(state: State) -> Literal["queryLlm", "semanticValidator"]:
 def semantic_gate(state: State) -> Literal["queryLlm", "__end__"]:
 	'''Determines whether to query the LLM for a new solution or to execute the current code based on the semantic check verdict'''
 	latest_change = state.changes_history[-1]
-	if latest_change.has_error:
+	if latest_change.has_error and state.iteration_count <= 5:
 		return "queryLlm"
 	else:
 		return END
