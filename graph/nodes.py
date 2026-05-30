@@ -1,6 +1,6 @@
 from core.sandbox import execute_code
-from state import ChangeHistory, State
-from llm_layer.client import generate_source_code, generate_code_patches, semantic_check
+from graph.state import ChangeHistory, State
+from llm_layer.client import generate_source_code, generate_code_patch, semantic_check
 from core.editor import update_source_code
 
 def queryLlm(state: State):
@@ -10,10 +10,10 @@ def queryLlm(state: State):
 		return { "source_code" : source_code }
 	else:
 		changes_history = state.changes_history
-		edits = generate_code_patches(state.source_code, state.changes_history)
+		edits = generate_code_patch(state.source_code, state.changes_history)
 		last_change = ChangeHistory(edits=edits)
 		changes_history.append(last_change)
-		return { "changes_history" : changes_history }
+		return { "changes_history" : changes_history, "iteration_count": state.iteration_count + 1 }
 
 def updateSourceCode(state: State):
 	'''Applies the latest edits from the change history to the current source code and returns the updated source code.'''

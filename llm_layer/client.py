@@ -21,7 +21,7 @@ def generate_source_code(user_request: str) -> list:
             ],
             temperature=0.1
         )
-		return response.choices[0].message.content
+		return response.choices[0].message.content.split("\n")
 	except Exception as e:
 		return str(e)
 

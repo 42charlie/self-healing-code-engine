@@ -37,6 +37,7 @@ CRITICAL RULES FOR EXTRACTION:
 3. 'lines_to_remove': The integer number of old lines to drop.
 4. 'keywords': A JSON array containing EXACTLY TWO unique words that currently exist on that specific target line. Do NOT use terms from other lines or from exception traces.
 5. 'lines_to_add': A JSON list of string lines to inject. You must preserve the indentation of the target block.
+6. 'sorting_order': You MUST sort your array of edits strictly by 'target_index' in DESCENDING order (highest index line numbers first). This ensures earlier modifications do not disrupt downstream indexing lines.
 
 ### STRUCTURAL EXAMPLE:
 If the input codebase is:
