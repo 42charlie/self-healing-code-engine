@@ -1,4 +1,7 @@
 
+from llm_layer.schemas import SingleEditBlock
+
+
 class LineAlignmentError(Exception):
     """Raised when the fuzzy matching engine cannot find the target line indices safely."""
     pass
@@ -47,22 +50,22 @@ def get_correct_line_index(source_code: list,
 
 	return -1
 
-def update_source_code(source_code: list,
-					   target_index: int,
-					   lines_to_remove: int,
-					   line_length: int,
-					   lines_to_add: list,
-					   keywords: list) -> list:
+def update_source_code(source_code: list, edits: list[SingleEditBlock]) -> list:
 
-	new_source_code = []
-	correct_index = get_correct_line_index(source_code, target_index, line_length, keywords)
-	if correct_index != -1:
-		new_source_code.extend(source_code[:correct_index])
-		new_source_code.extend(lines_to_add)
-		new_source_code.extend(source_code[correct_index + lines_to_remove:])
-	else:
-		raise LineAlignmentError(
-        f"Line matching failed. Target index {target_index} with keywords {keywords} "
-        f"and length {line_length} could not be aligned with high confidence."
-    )
+	#sort edits by target_index in descending order to avoid index shifting issues
+	edits_to_apply = sorted(edits, key=lambda x: x.target_index, reverse=True)
+
+	for edit in edits_to_apply:
+		new_source_code = []
+		correct_index = get_correct_line_index(source_code, edit.target_index, edit.line_length, edit.keywords)
+		if correct_index != -1:
+			new_source_code.extend(source_code[:correct_index])
+			new_source_code.extend(edit.lines_to_add)
+			new_source_code.extend(source_code[correct_index + edit.lines_to_remove:])
+		else:
+			raise LineAlignmentError(
+			f"Line matching failed. Target index {edit.target_index} with keywords {edit.keywords} "
+			f"and length {edit.line_length} could not be aligned with high confidence."
+		)
+		source_code = new_source_code
 	return new_source_code
