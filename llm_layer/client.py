@@ -29,7 +29,7 @@ def generate_code_patch(user_request: str, source_code: list, changes_history: l
 	user_prompt = (
         f"### ORIGINAL GOAL REQUIREMENT:\n{user_request}\n\n"
         f"### CURRENT CODEBASE STATE (WITH LINE INDICES):\n```python\n{'\\n'.join(source_code)}\n```\n\n"
-        f"### EXECUTION FAILURE METADATA:\n{changes_history[-3:]}\n\n"
+        f"### EXECUTION FAILURE METADATA:\n{changes_history[-1]}\n\n"
         f"Generate the exact structured batch edits payload required to resolve this failure."
     )
 	pydantic_json_schema = BatchEditBlock.model_json_schema()

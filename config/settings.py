@@ -1,6 +1,10 @@
 
+
 #sandbox
 VENV_SANDBOX_PATH = '/home/charlie/self-healing-code-engine/.sandbox_venv/bin/python'
+
+# Maximum iterations for the self-healing process
+MAXITERATION = 5
 
 #llm_generation
 GENERATION_MODEL = "llama-3.1-8b-instant"

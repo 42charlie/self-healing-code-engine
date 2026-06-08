@@ -1,4 +1,5 @@
 from langgraph.graph import START, END, StateGraph
+from config.settings import MAXITERATION
 
 from graph.nodes import queryLlm, updateSourceCode, executeCode, semanticValidator
 from graph.state import State
@@ -15,7 +16,7 @@ def sandbox_gate(state: State) -> Literal["queryLlm", "semanticValidator", "__en
 	'''Determines whether to query the LLM for a new solution or to perform a semantic validation'''
 	latest_change = state.changes_history[-1]
 	if latest_change.has_error:
-		if state.iteration_count > 3:
+		if state.iteration_count > MAXITERATION:
 			return END
 		return "queryLlm"
 	else:
@@ -24,7 +25,7 @@ def sandbox_gate(state: State) -> Literal["queryLlm", "semanticValidator", "__en
 def semantic_gate(state: State) -> Literal["queryLlm", "__end__"]:
 	'''Determines whether to query the LLM for a new solution or to execute the current code based on the semantic check verdict'''
 	latest_change = state.changes_history[-1]
-	if latest_change.has_error and state.iteration_count <= 5:
+	if latest_change.has_error and state.iteration_count <= MAXITERATION:
 		return "queryLlm"
 	else:
 		return END
