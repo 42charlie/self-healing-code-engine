@@ -28,7 +28,7 @@ def generate_source_code(user_request: str) -> list:
 def generate_code_patch(user_request: str, source_code: list, changes_history: list):
 	user_prompt = (
         f"### ORIGINAL GOAL REQUIREMENT:\n{user_request}\n\n"
-        f"### CURRENT CODEBASE STATE (WITH LINE INDICES):\n```python\n{'\\n'.join(source_code)}\n```\n\n"
+        f"### CURRENT CODEBASE STATE (WITH LINE INDICES):\n```python\n{'\n'.join(source_code)}\n```\n\n"
         f"### EXECUTION FAILURE METADATA:\n{changes_history[-1]}\n\n"
         f"Generate the exact structured batch edits payload required to resolve this failure."
     )
@@ -38,7 +38,7 @@ def generate_code_patch(user_request: str, source_code: list, changes_history: l
         {
             "type": "function",
             "function": {
-                "name": "submit_code_patches",
+                "name": "json",
                 "description": "Submits a batch of non-contiguous code edits to fix an existing file.",
                 "parameters": pydantic_json_schema
             }
@@ -54,7 +54,7 @@ def generate_code_patch(user_request: str, source_code: list, changes_history: l
             temperature=0.0,
 			tools=tools,
         	# force Groq to execute this specific function call block
-        	tool_choice={"type": "function", "function": {"name": "submit_code_patches"}},
+        	tool_choice={"type": "function", "function": {"name": "json"}},
 			max_completion_tokens=4096
         )
 		# extract the structured tool arguments string from the response payload

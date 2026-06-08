@@ -1,5 +1,4 @@
 
-
 #sandbox
 VENV_SANDBOX_PATH = '/home/charlie/self-healing-code-engine/.sandbox_venv/bin/python'
 
@@ -69,4 +68,9 @@ Your structural output tool arguments MUST look exactly like this:
         }
     ]
 }
+
+### CRITICAL PACING BOUNDARY:
+To prevent network timeout and string truncation crashes, you MUST limit your 'edits' array payload to a MAXIMUM of 2 SingleEditBlock objects per turn. 
+
+If a file requires more than 2 distinct line fixes, prioritize the most critical logical errors first (e.g., fixing class initializations or syntax errors). The remaining minor changes or test harness cleanups will be handled naturally by the engine during the subsequent graph iteration loops. Do not overflow the token runway.
 """
