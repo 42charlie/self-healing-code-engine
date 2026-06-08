@@ -5,7 +5,7 @@ class SingleEditBlock(BaseModel):
 	target_index: int
 	line_length: int
 	lines_to_remove: int
-	lines_to_add: list[str]
+	lines_to_add: str
 	keywords: tuple[str, str]
 
 class BatchEditBlock(BaseModel):

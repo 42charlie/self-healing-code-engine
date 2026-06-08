@@ -9,5 +9,5 @@ class ChangeHistory(BaseModel):
 class State(BaseModel):
 	user_request: str
 	source_code: list[str]
-	changes_history: list[ChangeHistory]
+	changes_history: list[ChangeHistory] = []
 	iteration_count: int = 0

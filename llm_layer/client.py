@@ -23,12 +23,12 @@ def generate_source_code(user_request: str) -> list:
         )
 		return response.choices[0].message.content.split("\n")
 	except Exception as e:
-		return str(e)
+		raise Exception(f"Source code generation failed: {str(e)}")
 
-def generate_code_patch(user_request: str, source_code: str, changes_history: list):
+def generate_code_patch(user_request: str, source_code: list, changes_history: list):
 	user_prompt = (
         f"### ORIGINAL GOAL REQUIREMENT:\n{user_request}\n\n"
-        f"### CURRENT CODEBASE STATE (WITH LINE INDICES):\n```python\n{source_code}\n```\n\n"
+        f"### CURRENT CODEBASE STATE (WITH LINE INDICES):\n```python\n{'\\n'.join(source_code)}\n```\n\n"
         f"### EXECUTION FAILURE METADATA:\n{changes_history[-3:]}\n\n"
         f"Generate the exact structured batch edits payload required to resolve this failure."
     )
@@ -51,10 +51,11 @@ def generate_code_patch(user_request: str, source_code: str, changes_history: li
                 {"role": "system", "content": CODE_PATCHER_PROMPT},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0.1,
+            temperature=0.0,
 			tools=tools,
         	# force Groq to execute this specific function call block
         	tool_choice={"type": "function", "function": {"name": "submit_code_patches"}},
+			max_completion_tokens=4096
         )
 		# extract the structured tool arguments string from the response payload
 		tool_call = response.choices[0].message.tool_calls[0]
@@ -64,7 +65,7 @@ def generate_code_patch(user_request: str, source_code: str, changes_history: li
 		parsed_payload = BatchEditBlock.model_validate_json(raw_arguments_json)
 		return parsed_payload
 	except Exception as e:
-		return str(e)
+		raise Exception(f"Code patch generation failed: {str(e)}")
 
 def semantic_check(source_code:str, user_request: str):
 	user_prompt = (

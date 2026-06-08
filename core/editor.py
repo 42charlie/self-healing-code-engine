@@ -18,11 +18,10 @@ def get_correct_line_index(source_code: list,
 	'''Returns the index of the line that is most likely to be the correct line based on the given keywords and line length.'''
 	scores = []
 	lines_range = source_code[max(0, target_index-6): min(len(source_code), target_index+5)]
-	print(f"Lines range: {lines_range}, lines len: {len(lines_range)}")
 	half_range = len(lines_range) // 2
 	for local_index, line in enumerate(lines_range):
 		score = 0
-		global_index = local_index + max(0, target_index - 5)
+		global_index = local_index + max(0, target_index - 6)
 
 		#calculate keywords score
 		for keyword in keywords:
@@ -41,7 +40,7 @@ def get_correct_line_index(source_code: list,
 
 		scores.append((global_index, score))
 	scores.sort(key=lambda x: x[1], reverse=True)
-	print(f"Scores: {scores}")
+	# print(f"Scores: {scores}")
 
 	if len(scores) == 1 and scores[0][1] > 50:
 		return scores[0][0]
@@ -58,9 +57,10 @@ def update_source_code(source_code: list, edits: list[SingleEditBlock]) -> list:
 	for edit in edits_to_apply:
 		new_source_code = []
 		correct_index = get_correct_line_index(source_code, edit.target_index, edit.line_length, edit.keywords)
+		print(f"[debug] correct_index: {correct_index} for target_index: {edit.target_index}")
 		if correct_index != -1:
 			new_source_code.extend(source_code[:correct_index])
-			new_source_code.extend(edit.lines_to_add)
+			new_source_code.extend(edit.lines_to_add.splitlines())
 			new_source_code.extend(source_code[correct_index + edit.lines_to_remove:])
 		else:
 			raise LineAlignmentError(

@@ -15,6 +15,12 @@ CRITICAL RULES:
 4. If the user code requires external third-party libraries, include standard import statements at the top of the file.
 5. Ensure your code handles edge cases, exceptions, and executes standalone without requiring missing variable definitions.
 
+CRITICAL RUNTIME REQUIREMENT:
+You MUST include a concrete, top-level execution block at the absolute bottom of your script so that when the file is run directly via `python <filename>`, the entire codebase logic is fully exercised.
+- For synchronous code: Use a standard `if __name__ == "__main__":` block calling your test functions.
+- For asynchronous code: You MUST explicitly include `import asyncio` and invoke your loop using `asyncio.run(main())`.
+
+Failure to include an active execution entrypoint will break the pipeline evaluation.
 Any text output that is not valid Python code will crash the parsing ecosystem. Begin code output immediately.
 """
 
@@ -32,17 +38,18 @@ Be ruthlessly objective. If a requirement is missing or logically broken, set ma
 CODE_PATCHER_PROMPT = """You are a Precision Code Patch Engine. You must output a structured batch of edits to fix the target code based on a crash log.
 
 CRITICAL RULES FOR EXTRACTION:
-1. 'target_index': The exact 0-based integer line number from the provided codebase view where the modification begins.
+1. 'target_index': The exact 0-based integer line index from the provided codebase view where the modification begins.
 2. 'line_length': The total number of visible alphanumeric or symbol characters on that targeted line (ignore all spaces and indentation).
 3. 'lines_to_remove': The integer number of old lines to drop.
 4. 'keywords': A JSON array containing EXACTLY TWO unique words that currently exist on that specific target line. Do NOT use terms from other lines or from exception traces.
-5. 'lines_to_add': A JSON list of string lines to inject. You must preserve the indentation of the target block.
+5. 'lines_to_add': A string of lines separated by newlines to inject. You must preserve the indentation of the target block.
 6. 'sorting_order': You MUST sort your array of edits strictly by 'target_index' in DESCENDING order (highest index line numbers first). This ensures earlier modifications do not disrupt downstream indexing lines.
+7. 'OVERWRITE INTEGRITY': When modifying a structure, ensure your 'lines_to_remove' count matches the exact structural scope of the old code block you are replacing. Do not leave trailing duplicate function headers or orphaned blocks behind.
 
 ### STRUCTURAL EXAMPLE:
 If the input codebase is:
-0: def run_calculation(val):
-1:     return val / 0
+def run_calculation(val):
+    return val / 0
 
 And the error log is "ZeroDivisionError: division by zero on line 1"
 
@@ -54,11 +61,7 @@ Your structural output tool arguments MUST look exactly like this:
             "line_length": 14,
             "lines_to_remove": 1,
             "keywords": ["return", "val"],
-            "lines_to_add": [
-                "    if val == 0:",
-                "        return 0",
-                "    return val / 1"
-            ]
+            "lines_to_add": "    if val == 0:\n        return 0\n    return val / 1"
         }
     ]
 }

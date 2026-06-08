@@ -15,7 +15,7 @@ def sandbox_gate(state: State) -> Literal["queryLlm", "semanticValidator", "__en
 	'''Determines whether to query the LLM for a new solution or to perform a semantic validation'''
 	latest_change = state.changes_history[-1]
 	if latest_change.has_error:
-		if state.iteration_count > 5:
+		if state.iteration_count > 3:
 			return END
 		return "queryLlm"
 	else:
